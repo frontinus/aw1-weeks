@@ -1,2 +1,3 @@
-# aw1-weeks
-Esercizi settimanali per il corso Aw1
+# Web Applications 1 - course 2 (I-Z)
+
+Each folder in this repo contains the exercises and the examples made during the lectures of the course.

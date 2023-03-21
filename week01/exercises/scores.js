@@ -1,25 +1,39 @@
-"use strict";
+'use strict';
 
-const myScores = [-12, -3, 18, 10, 4, -1, 0, 14];
+const scores = [20, -5, -1, 100, -3, 30, 50];
+const betterScores = [];
+let NN = 0;
 
-const modifiedScores = [...myScores];
+for(const s of scores) {
+  if(s > 0)
+    betterScores.push(s);
+}
 
-modifiedScores.sort( (a,b) => (a-b) );
+NN = scores.length - betterScores.length;
 
-let NN = modifiedScores.findIndex( el => el >= 0 )
+/*let minScore = Math.min(... betterScores);
+let index = betterScores.indexOf(minScore);
+betterScores.splice(index, 1);
 
-console.log(NN);
-modifiedScores.splice(0, NN);
-modifiedScores.shift();
-modifiedScores.shift();
+minScore = Math.min(... betterScores);
+index = betterScores.indexOf(minScore);
+betterScores.splice(index, 1);*/
+
+// alternative with sort
+betterScores.sort((a,b)=> a-b);
+betterScores.shift();
+betterScores.shift();
 
 let avg = 0;
-for (const val of modifiedScores)
-    avg += val;
-avg = avg / modifiedScores.length;
+for(const s of betterScores) {
+  avg += s;
+}
+avg /= betterScores.length;
+avg = Math.round(avg);
 
-const addedArray = Array(NN+2).fill(Math.round(avg));
+for (let i=0; i<NN+2; i++){
+  betterScores.push(avg);
+}
 
-modifiedScores.splice(modifiedScores.length, 0, ...addedArray);
-
-console.log(modifiedScores);
+console.log(scores);
+console.log(betterScores);
