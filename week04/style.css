@@ -1,16 +1,1 @@
-<<<<<<< HEAD
-h1{background-color: darkgreen;}
-=======
-aside, footer {
-  background-color: blue;
-  color: white;
-}
-
-.question {
-  color:dimgray;
-}
-
-#bigger-margin {
-  margin-top: 3em;
-}
->>>>>>> upstream/main
+h1 { background-color: darkgreen;}

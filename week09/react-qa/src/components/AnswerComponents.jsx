@@ -1,94 +1,90 @@
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import { Row, Col, Table, Button } from 'react-bootstrap';
-import AnswerForm from './AnswerForm';
+import { Button, Table, Row, Col } from 'react-bootstrap';
 import { useState } from 'react';
+import AnswerForm from './AnswerForm';
 
-function Answers(props) {
+function AnswerRow(props) {
+  const { e } = props;
   return (
-    <>
-      <Row>
-        <Col as="h2">Answers ({props.answers.length}):</Col>
-      </Row>
-      <Row>
-        <Col lg={10} className="mx-auto">
-          <AnswerTable answers={props.answers} voteUp={props.voteUp} addAnswer={props.addAnswer} updateAnswer={props.updateAnswer}></AnswerTable>
-        </Col> 
-      </Row>
-    </>
+    <tr>
+      <td>{e.date.format("YYYY-MM-DD")}</td>
+      <td>{e.text}</td>
+      <td>{e.respondent}</td>
+      <td>{e.score}</td>
+      <td><Button variant="primary" onClick={props.increaseScore}><i className='bi bi-arrow-up-circle' /></Button>
+        <Button variant='secondary' onClick={props.editAnswer} className='mx-2'><i className='bi bi-pencil-square' /></Button>
+        <Button variant="danger" onClick={props.deleteAnswer}><i className='bi bi-trash' /></Button></td>
+    </tr>
   );
 }
 
-function AnswerTable(props) {
-  const [showForm, setShowForm] = useState(false);
-  const [sortOrder, setSortOrder] = useState('none');
-  const [editableAnswer, setEditableAnswer] = useState();
+function MainAnswers(props) {
 
-  const sortedAnswers = [...props.answers];
+  const [showForm, setShowForm] = useState(false);  // local state (form visibility), does not need to be in App
+  const [objToEdit, setObjToEdit] = useState(undefined);  // state to keep the info about the object to edit
+
+  const [sortOrder, setSortOrder] = useState('none');  // local state for visualization only, does not need to change the list in App
+
+  const sortedAnswers = [...props.answerList];  // make a shallow copy
+  // sort order is recomputed at each re-render: do NOT make a state with the sorted list!
   if (sortOrder === 'asc')
     sortedAnswers.sort((a,b) => a.score - b.score);
   else if (sortOrder === 'desc')
     sortedAnswers.sort((a,b) => b.score - a.score);
-
+  
   const sortByScore = () => {
-    setSortOrder((oldOrder) => oldOrder === 'asc' ? 'desc' : 'asc');
+    setSortOrder( (oldSortOrder) => oldSortOrder === 'asc' ? 'desc' : 'asc' );
   }
 
   return (
     <>
-      <Table striped>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Text</th>
-            <th>Author</th>
-            <th>Score <Button variant="link" onClick={sortByScore} style={{color: 'black'}}><i className={sortOrder === 'asc' ? 'bi bi-sort-numeric-up' : 'bi bi-sort-numeric-down'}></i></Button></th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {
-            sortedAnswers.map((ans) => <AnswerRow answer={ans} key={ans.id} voteUp={props.voteUp} setShowForm={setShowForm} setEditableAnswer={setEditableAnswer}/>)
-          }
-        </tbody>
-      </Table>
-
-      { /* Assumption: the last id will be in the last item in the array */}
-      { showForm ? 
-          <AnswerForm 
-            key={editableAnswer ? editableAnswer.id : -1} 
-            lastId={props.answers.slice(-1)[0].id} 
-            answer={editableAnswer} 
-            addAnswer={(answer) => {props.addAnswer(answer); setShowForm(false);}} 
-            cancel={() => setShowForm(false)} 
-            updateAnswer={(answer) => {props.updateAnswer(answer); setShowForm(false);}}
-          /> 
-        : 
-          <Button variant="success" onClick={() => { setShowForm(true); setEditableAnswer(); }}>Add</Button>}
+      <Row>
+        <Col>
+          <p className='fw-bold'>Answers ({props.answerList.length}):</p>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <Table hover>
+            {/* <Table striped bordered hover> */}
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Text</th>
+                <th>Author</th>
+                <th>Score
+                  <i className={'mx-1 '+(sortOrder ==='asc' ? 'bi bi-sort-numeric-up' : 'bi bi-sort-numeric-down')} onClick={sortByScore} style={{color: 'black'}}/>
+                </th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedAnswers.map((e) =>
+                <AnswerRow e={e} key={e.id} increaseScore={() => props.increaseScore(e.id)}
+                  editAnswer={() => { setObjToEdit(e); setShowForm(true); }}
+                  deleteAnswer={() => props.deleteAnswer(e.id)} />)
+              }
+            </tbody>
+          </Table>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          {/* key is needed because when the key value changes, the component is re-created
+              so the component state is re-initialized with the values of the new object.
+              This can happen when pressing edit on one and then another element without closing the form.
+          */}
+          {showForm ?
+            <AnswerForm key={objToEdit ? objToEdit.id : -1}
+              addAnswer={(e) => { props.addAnswer(e); setShowForm(false); }}
+              closeForm={() => { setShowForm(false); setObjToEdit(undefined); }}
+              objToEdit={objToEdit}
+              editAnswer={(e) => { props.editAnswer(e); setShowForm(false); setObjToEdit(undefined); }} />
+            : <Button onClick={() => setShowForm(true)}>Add answer</Button>}
+        </Col>
+      </Row>
     </>
-  );
+  )
 }
 
-function AnswerRow(props) {
-  return(
-    <tr><AnswerData answer={props.answer}/><AnswerActions voteUp={props.voteUp} answer={props.answer} setShowForm={props.setShowForm} setEditableAnswer={props.setEditableAnswer}/></tr>
-  );
-}
-
-function AnswerData(props) {
-  return(
-    <>
-      <td>{props.answer.date.format('YYYY-MM-DD')}</td>
-      <td>{props.answer.text}</td>
-      <td>{props.answer.name}</td>
-      <td>{props.answer.score}</td>
-    </>
-  );
-}
-
-function AnswerActions(props) {
-  return <td>
-    <Button variant='primary' onClick={() => {props.setShowForm(true); props.setEditableAnswer(props.answer);}}><i className='bi bi-pencil-square'></i></Button> <Button variant='success' onClick={() => props.voteUp(props.answer.id)}><i className='bi bi-arrow-up'></i></Button>
-    </td>
-}
-
-export default Answers;
+export { MainAnswers };
