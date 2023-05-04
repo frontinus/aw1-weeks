@@ -1,7 +1,8 @@
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { Button, Table, Row, Col } from 'react-bootstrap';
 import { useState } from 'react';
-import AnswerForm from './AnswerForm';
+import { Link, useNavigate } from 'react-router-dom';
+import { AnswerForm } from './AnswerForm';
 
 function AnswerRow(props) {
   const { e } = props;
@@ -12,7 +13,9 @@ function AnswerRow(props) {
       <td>{e.respondent}</td>
       <td>{e.score}</td>
       <td><Button variant="primary" onClick={props.increaseScore}><i className='bi bi-arrow-up-circle' /></Button>
-        <Button variant='secondary' onClick={props.editAnswer} className='mx-2'><i className='bi bi-pencil-square' /></Button>
+        <Link to={`/edit/${e.id}`}>
+          <Button variant='secondary' className='mx-2'><i className='bi bi-pencil-square' /></Button>
+        </Link>
         <Button variant="danger" onClick={props.deleteAnswer}><i className='bi bi-trash' /></Button></td>
     </tr>
   );
@@ -20,7 +23,6 @@ function AnswerRow(props) {
 
 function MainAnswers(props) {
 
-  const [showForm, setShowForm] = useState(false);  // local state (form visibility), does not need to be in App
   const [objToEdit, setObjToEdit] = useState(undefined);  // state to keep the info about the object to edit
 
   const [sortOrder, setSortOrder] = useState('none');  // local state for visualization only, does not need to change the list in App
@@ -69,22 +71,14 @@ function MainAnswers(props) {
         </Col>
       </Row>
       <Row>
-        <Col>
-          {/* key is needed because when the key value changes, the component is re-created
-              so the component state is re-initialized with the values of the new object.
-              This can happen when pressing edit on one and then another element without closing the form.
-          */}
-          {showForm ?
-            <AnswerForm key={objToEdit ? objToEdit.id : -1}
-              addAnswer={(e) => { props.addAnswer(e); setShowForm(false); }}
-              closeForm={() => { setShowForm(false); setObjToEdit(undefined); }}
-              objToEdit={objToEdit}
-              editAnswer={(e) => { props.editAnswer(e); setShowForm(false); setObjToEdit(undefined); }} />
-            : <Button onClick={() => setShowForm(true)}>Add answer</Button>}
+        <Col>          
+          <Link to='/add'>
+            <Button variant='success'>Add answer</Button>
+          </Link>
         </Col>
       </Row>
     </>
   )
 }
 
-export { MainAnswers };
+export { MainAnswers, AnswerRow };
