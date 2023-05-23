@@ -15,13 +15,14 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(cors());
 
+const answerDelay = 2000;
 
 /*** APIs ***/
 
 // GET /api/questions
 app.get('/api/questions', (req, res) => {
   dao.listQuestions()
-    .then(questions => res.json(questions))
+    .then(questions => setTimeout(()=>res.json(questions), answerDelay))
     .catch(() => res.status(500).end());
 });
 
@@ -32,7 +33,7 @@ app.get('/api/questions/:id', async (req, res) => {
     if(result.error)
       res.status(404).json(result);
     else
-      res.json(result);
+      setTimeout(()=>res.json(result), answerDelay);
   } catch(err) {
     res.status(500).end();
   }
@@ -52,7 +53,7 @@ app.get('/api/questions/:id/answers', async (req, res) => {
       if (result.error)
         res.status(404).json(result);
       else
-        res.json(result);  // NB: list of answers can also be an empty array
+        setTimeout(()=>res.json(result), answerDelay);  // NB: list of answers can also be an empty array
     }
   } catch(err) {
     res.status(500).end();
@@ -112,7 +113,7 @@ app.post('/api/answers', [
       const answerId = await dao.createAnswer(answer);
       // Return the newly created id of the question to the caller. 
       // A more complex object can also be returned (e.g., the original one with the newly created id)
-      res.status(201).json(answerId);
+      setTimeout(()=>res.status(201).json(answerId), answerDelay);
     } catch (err) {
       res.status(503).json({ error: `Database error during the creation of answer ${answer.text} by ${answer.respondent}.` });
     }
@@ -139,7 +140,7 @@ app.put('/api/answers/:id', [
 
   try {
     const numRowChanges = await dao.updateAnswer(answer);
-    res.json(numRowChanges);
+    setTimeout(()=>res.json(numRowChanges), answerDelay);
     //res.status(200).end();
   } catch(err) {
     res.status(503).json({error: `Database error during the update of answer ${req.params.id}.`});
@@ -160,7 +161,7 @@ app.post('/api/answers/:id/vote', [
   try {
     const numRowChanges = await dao.voteAnswer(req.params.id, req.body.vote);
     // number of changed rows is sent to client as an indicator of success
-    res.json(numRowChanges);
+    setTimeout(()=>res.json(numRowChanges), answerDelay);
   } catch (err) {
     res.status(503).json({ error: `Database error during the vote of answer ${req.params.id}.` });
   }
@@ -173,7 +174,7 @@ app.delete('/api/answers/:id', async (req, res) => {
   try {
     const numRowChanges = await dao.deleteAnswer(req.params.id);  
     // number of changed rows is sent to client as an indicator of success
-    res.json(numRowChanges);
+    setTimeout(()=>res.json(numRowChanges), answerDelay);
   } catch(err) {
     console.log(err);
     res.status(503).json({ error: `Database error during the deletion of answer ${req.params.id}.`});
